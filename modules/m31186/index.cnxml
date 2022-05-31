@@ -1,0 +1,80 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Executing a Java Program</title>
+  <metadata>
+  <md:content-id>m31186</md:content-id><md:title>Executing a Java Program</md:title>
+  <md:abstract>To run a Java program, the interpreter must be invoked with an argument giving the name of the main method. This module explains the exceptions that can be raised if the name is incorrect.</md:abstract>
+  <md:uuid>a4e55963-8761-4434-864e-d3ebb07e76c8</md:uuid>
+</metadata>
+
+<content>
+    <para id="id197005">You can run a Java program from within an environment or by executing
+the interpreter from the command line:</para>
+    <code id="id197010" display="block">java Test
+</code>
+    <para id="id197023">where <code display="inline">Test</code> is the name of a class containing a <code display="inline">main</code> method.</para>
+    <para id="id197038">Suggestion: It is convenient to write <code display="inline">main</code> methods in most classes and to use then
+for testing classes individually. After the classes are integrated into a single
+program, you only need ensure that the interpreter is invoked on the class that
+contains the “real” <code display="inline">main</code> method.</para>
+    <para id="id197056">Two runtime errors can occur if the interpreter is not successful in
+finding and running the program.</para>
+    <section id="uid1">
+      <title>
+        <emphasis effect="bold">NoClassDefFoundError</emphasis>
+      </title>
+      <para id="id197071">The interpreter must be able to find the file containing a
+class with the <code display="inline">main</code> method, for example, <code display="inline">Test.class</code>.
+If packages are not used, this must be in the directory where the
+interpreter is executed. Check that the name of the class is the same
+as the name of the file without the extension. Case is significant!</para>
+      <para id="id197087"><emphasis effect="bold">Warning!</emphasis> If you are compiling and running Java from a command window
+or shell with a history facility, you are likely to encounter this error. First,
+you compile the program:</para>
+      <code id="id197096" display="block">javac MyClass.java
+</code>
+      <para id="id197106">and then you recall that line and erase the <code display="inline">c</code> from <code display="inline">javac</code> to
+obtain the command for the interpreter:</para>
+      <code id="id197122" display="block">java MyClass.java
+</code>
+      <para id="id197131">Unfortunately, <code display="inline">MyClass.java</code> is <emphasis effect="italics">not</emphasis> the name of the class so you
+will get this exception. You must erase the <code display="inline">.java</code> extension as well to
+run the interpreter:</para>
+      <code id="id197153" display="block">java MyClass
+</code>
+      <para id="id197162">If you are using packages, the main class must be in a <emphasis effect="italics">subdirectory</emphasis>
+of that name. For example, given:</para>
+      <code id="id197171" display="block">package project1.userinterface;
+class Test {
+  public static void main(String[] args) {
+    ...
+  }
+}
+</code>
+      <para id="id197223">the file <code display="inline">Test.class</code> must be located in the directory <code display="inline">userinterface</code>
+that is a subdirectory of <code display="inline">project1</code> that is a subdirectory of the
+directory where the interpreter is executed:</para>
+      <code id="id197244" display="block">c:\projects&gt; dir
+   &lt;DIR&gt; project1
+c:\projects&gt; dir project1
+   &lt;DIR&gt; userinterface
+c:\projects&gt; dir project1\userinterface
+   Test.class
+</code>
+      <para id="id197310">The program is invoked by giving the fully qualified name made up of the
+package names and the class name:</para>
+      <code id="id197316" display="block">c:\projects&gt; java project1.userinterface.Test
+</code>
+    </section>
+    <section id="uid2">
+      <title>
+        <emphasis effect="bold">NoSuchMethodFoundError: main</emphasis>
+      </title>
+      <para id="id197340">This error will occur if there is no method <code display="inline">main</code> in the class, or if
+the declaration is not precisely correct: the <code display="inline">static</code> modifier,
+the <code display="inline">void</code> return type, the method name <code display="inline">main</code> written in lower case, and one
+parameter of type <code display="inline">String[]</code>. If you forget the <code display="inline">public</code> modifier,
+the error message is <emphasis effect="bold">Main method not public</emphasis>.
+</para>
+    </section>
+  </content>
+</document>

@@ -1,0 +1,195 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Structural Errors in Java</title>
+  <metadata>
+  <md:content-id>m31183</md:content-id><md:title>Structural Errors in Java</md:title>
+  <md:abstract>This module describes compilation errors that result from incorrect methods (primarily incorrect return statements) and incorrect use of the static attribute.</md:abstract>
+  <md:uuid>78682fca-1010-4b75-bea1-42072daed8bd</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Methods and return statements</title>
+      <para id="id222378">There are a number of errors related to the structure of methods and their
+return statements; in general they are easy to fix.</para>
+      <section id="uid1">
+        <title>
+          <emphasis effect="bold">missing return statement</emphasis>
+        </title>
+        <para id="id222394">When a method returns a non-void type, <emphasis effect="italics">every</emphasis> path that leaves the
+method must have a <code display="inline">return</code>-statement,<footnote id="uid2">A path may also leave the
+method via a <code display="inline">throw</code> statement.</footnote><emphasis effect="italics">even</emphasis> if there is no way that the path can be
+executed:</para>
+        <code id="id222428" display="block">int max(int i, int j) {
+  if (i &gt; j) return i;
+  else if (i &lt;= j) return j;
+  // Error: what about the path when i&gt;j, i&lt;=j are both false?!!
+}
+</code>
+        <para id="id222480">Adding a dummy alternative <code display="inline">else return 0;</code> at the end of the method will
+enable successful compilation.</para>
+        <para id="id222491"><emphasis effect="bold">Eclipse:</emphasis><emphasis effect="bold">This method must return a result of type int</emphasis>
+This Eclipse message is rather hard to understand because, clearly, the
+method does return a result of type <code display="inline">int</code>, just not on all paths.</para>
+      </section>
+      <section id="uid3">
+        <title>
+          <emphasis effect="bold">missing return value</emphasis>
+        </title>
+        <para id="id222525">A method returning a type must have a <code display="inline">return</code>-statement
+that includes an expression of the correct type:</para>
+        <code id="id222534" display="block">int max(int i, int j) {
+  return;                // Error, missing int expression
+}
+</code>
+        <para id="id222561">
+          <emphasis effect="bold">Eclipse:</emphasis>
+          <emphasis effect="bold">This method must return a result of type int</emphasis>
+        </para>
+      </section>
+      <section id="uid4">
+        <title>
+          <emphasis effect="bold">cannot return a value from method whose result type is void</emphasis>
+        </title>
+        <para id="id222588">Conversely, a <code display="inline">return</code>-statement in a void method must not
+have an expression:</para>
+        <code id="id222598" display="block">void m(int i, int j) {
+  return i + j;          // Error, the method was declared void
+}
+</code>
+        <para id="id222625">
+          <emphasis effect="bold">Eclipse:</emphasis>
+          <emphasis effect="bold">Void methods cannot return a value</emphasis>
+        </para>
+      </section>
+      <section id="uid5">
+        <title>
+          <emphasis effect="bold">invalid method declaration; return type required</emphasis>
+        </title>
+        <para id="id222651">Every method <emphasis effect="italics">except constructors</emphasis> must have a return type or <code display="inline">void</code>
+specified; if not, this error will arise:</para>
+        <code id="id222665" display="block">max(int i, int j) {
+  ...
+}
+</code>
+        <para id="id222692">The error frequently occurs because it is easy to misspell the name of a
+constructor; the compiler then thinks that it is a normal method without
+a return type:</para>
+        <code id="id222698" display="block">class MyClass {
+  MyClass(int i) { ... }
+  Myclass(int i, int j) { ... }   // Error: lowercase c
+}
+</code>
+        <para id="id222733">
+          <emphasis effect="bold">Eclipse:</emphasis>
+          <emphasis effect="bold">Return type for the method is missing</emphasis>
+        </para>
+      </section>
+      <section id="uid6">
+        <title>
+          <emphasis effect="bold">unreachable statement</emphasis>
+        </title>
+        <para id="id222759">The error can occur if you write a statement <emphasis effect="italics">after</emphasis> a return statement:</para>
+        <code id="id222768" display="block">void m(int j) {
+  System.out.println("Value is " + j);
+  return;
+  j++;
+}
+</code>
+        <para id="id222811">The check is purely syntactic, so the error <emphasis effect="italics">will occur</emphasis> in the following method:</para>
+        <code id="id222822" display="block">if (true) {
+  return n + 1;        // Only this alternative executed, but ...
+}
+else {
+  return n - 1;
+  n = n + 1;           // ... this is an error
+}
+</code>
+        <para id="id222884">
+          <emphasis effect="bold">Eclipse:</emphasis>
+          <emphasis effect="bold">Unreachable code</emphasis>
+        </para>
+      </section>
+    </section>
+    <section id="cid2">
+      <title>Access to static entities</title>
+      <para id="id222907">The modifier <code display="inline">static</code> means that a variable or method is associated with a
+<emphasis effect="italics">class</emphasis> and not with individual <emphasis effect="italics">objects</emphasis> of a
+class.<footnote id="uid7"><code display="inline">static</code> has other uses that we do not consider here: (a) as
+a modifier for nested classes and (b) in static initializers.</footnote> Normally, static
+entities are rarely used in Java (other than for the declaration of
+constants), because programs are written as classes to be instantiated to
+create at least one object:</para>
+      <code id="id222943" display="block">class MyClass {
+  int field;
+  void m(int parm) {
+    field = parm;
+  }
+  public static void main(String[] args) {
+    MyClass myclass = new MyClass();    // Create object
+    myclass.m(5);                       // Call object's method
+    System.out.println(myclass.field);  // Access object's field
+  }
+}
+</code>
+      <para id="id223042">Some teachers of elementary programming in Java prefer to start with a procedural
+approach that involves writing a class containing static variables and static
+methods that are accessed from the main method without instantiating an object
+as was done above:</para>
+      <code id="id223049" display="block">class MyClass1 {
+  static int field;
+  static void m(int parm) {
+    field = parm;
+  }
+  public static void main(String[] args) {
+    m(5);                                 // OK
+    System.out.println(field);            // OK
+  }
+}
+</code>
+      <section id="uid8">
+        <title>
+          <emphasis effect="bold">non-static variable ... cannot be referenced from a static context</emphasis>
+        </title>
+        <para id="id223148">Since the method <code display="inline">main</code> is (required to be) static, so must
+any variable declared in the class that is accessed by the method.
+Omitting the modifier results in a compile-time error:</para>
+        <code id="id223158" display="block">  int field;                  // Forgot "static"
+     ...
+  System.out.println(field);  // Error, which field?
+</code>
+        <para id="id223185">The variable <code display="inline">field</code> does not exist until an object of the class is
+instantiated, so using the identifier <code display="inline">field</code> by itself is impossible before
+objects are instantiated. Furthermore, it is ambiguous afterwards, as there may
+be many objects of the same class.</para>
+        <para id="id223203">
+          <emphasis effect="bold">Eclipse:</emphasis>
+          <emphasis effect="bold">Cannot make a static reference to the non-static field ...</emphasis>
+        </para>
+      </section>
+      <section id="uid9">
+        <title>
+          <emphasis effect="bold">non-static method ... cannot be referenced from a static context</emphasis>
+        </title>
+        <para id="id223230">Similarly, a non-static method cannot be called from a static method like <code display="inline">main</code>;
+the reason is a bit subtle.
+When a non-static method like <code display="inline">m</code> is executed, it receives as an <emphasis effect="italics">implicit</emphasis> parameter
+the reference to an object. (The reference can be explicitly referred to using
+<code display="inline">this</code>.) Therefore, when it accesses variables declared in the class like <code display="inline">field</code>:</para>
+        <code id="id223262" display="block">void m(int parm) {            // Forgot "static"
+  field = parm;               // Error, which field?
+}
+ 
+public static void main(String[] args) {
+  m(5);
+}
+</code>
+        <para id="id223324">it is clear that the variable is the one associated with the object referenced
+by <code display="inline">this</code>. Thus, in the absence of an object, it is meaningless to call a non-static method
+from a static method.</para>
+        
+        <para id="id223349"><emphasis effect="bold">Eclipse: Cannot make a static reference to the non-static method ... from the type ...</emphasis>
+        </para>
+      </section>
+    </section>
+  </content>
+</document>

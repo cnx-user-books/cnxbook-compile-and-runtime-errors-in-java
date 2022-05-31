@@ -1,0 +1,76 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Assignment and Equality in Java</title>
+  <metadata>
+  <md:content-id>m31187</md:content-id><md:title>Assignment and Equality in Java</md:title>
+  <md:abstract>Because Java uses reference semantics, there are potential errors that can occur with the assignment statement and the equality operator.</md:abstract>
+  <md:uuid>cf39bc76-f061-47d6-99d1-fea56b38f772</md:uuid>
+</metadata>
+
+<content>
+    <para id="id2258257">Java programmers make mistakes in the use of the assignment and equality
+operators, especially when strings are used. The concept of reference
+semantics is (or should be) explained in detail in your textbook, so we
+limit ourselves to a reminder of the potential problems.</para>
+    <section id="cid1">
+      <title>String equality</title>
+      <para id="id2258277">Given:</para>
+      <code id="id2258280" display="block">String s1 = "abcdef";
+String s2 = "abcdef";
+String s3 = "abc" + "def";
+String s4 = "abcdef" + "";
+String s5 = s1 + "";
+String t1 = "abc";
+String t2 = "def";
+String s6 = t1 + t2;
+</code>
+      <para id="id2258999"><emphasis effect="italics">all</emphasis> strings <code display="inline">sn</code> are equal when compared using the method <code display="inline">equals</code>
+in the class <code display="inline">String</code> that compares the <emphasis effect="italics">contents</emphasis> pointed to by the
+reference:</para>
+      <code id="id2259030" display="block">if (s1.equals(s5))         // Condition evaluates to true
+</code>
+      <para id="id2259042">The string <emphasis effect="italics">literal</emphasis><code display="inline">"abcdef"</code> is stored only once, so strings <code display="inline">s1</code>,
+<code display="inline">s2</code> and (perhaps surprisingly) <code display="inline">s3</code> and <code display="inline">s4</code> are also equal when compared
+using the equality operator <code display="inline">==</code> that compares the references themselves:</para>
+      <code id="id2259085" display="block">if (s1 == s3)              // Condition evaluates to true
+</code>
+      <para id="id2259098">However, <code display="inline">s5</code> and <code display="inline">s6</code> are not equal (<code display="inline">==</code>) to <code display="inline">s1</code> through <code display="inline">s4</code>,
+because their values are created at runtime and stored separately; therefore,
+their references are not the same as they are for the literals created at
+compile-time.</para>
+      <para id="id2259132"><emphasis effect="bold">Always</emphasis> use <code display="inline">equals</code> rather than <code display="inline">==</code> to compare strings, unless you
+can explain why the latter is needed!</para>
+    </section>
+    <section id="cid2">
+      <title>Assignment of references</title>
+      <para id="id2259160">The assignment operator copies references, not the contents of an object.
+Given:</para>
+      <code id="id2259165" display="block">int[] a1 = { 1, 2, 3, 4, 5 };
+int[] a2 = a1;
+a1[0] = 6;
+</code>
+      <para id="id2259193">since <code display="inline">a2</code> points to the same array, the value of <code display="inline">a2[0]</code> is also changed
+to 6. To copy an array, you have to write an explicit loop and copy the elements
+one by one.</para>
+      <para id="id2259211">To copy an object pointed to by a reference, you can create a new
+object and pass the old object as a parameter to a constructor:</para>
+      <code id="id2259216" display="block">class MyClass {
+  int x;
+  MyClass(int y) { x = y; }
+  MyClass(MyClass myclass) { this.x = myclass.x; }
+}
+ 
+class Test {
+  public static void main(String[] args) {
+    MyClass myclass1 = new MyClass(5);
+    MyClass myclass2 = new MyClass(myclass1);
+    myclass1.x = 6;
+    System.out.println(myclass1.x);  // Prints 6
+    System.out.println(myclass2.x);  // Prints 5
+  }
+}
+</code>
+      <para id="id2259351">Alternatively, you can use <code display="inline">clone</code> as described in Java textbooks.
+</para>
+    </section>
+  </content>
+</document>

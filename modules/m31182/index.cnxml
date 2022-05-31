@@ -1,0 +1,156 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Semantic Errors in Java</title>
+  <metadata>
+  <md:content-id>m31182</md:content-id><md:title>Semantic Errors in Java</md:title>
+  <md:abstract>A Java program can be syntactically correct but still not compile because of errors related to the semantics of the language.</md:abstract>
+  <md:uuid>7233683e-a941-45c4-b65b-1d04f2a5f0cf</md:uuid>
+</metadata>
+
+<content>
+    <para id="id124950">This group of errors results from code that is syntactically correct but
+violates the semantics of Java, in particular the rules relating to type checking.</para>
+    <section id="uid1">
+      <title>
+        <emphasis effect="bold">variable ... might not have been initialized</emphasis>
+      </title>
+      <para id="id124970">An <emphasis effect="italics">instance variable</emphasis> declared in a class has a default initial
+value.<footnote id="uid2">A <emphasis effect="italics">class</emphasis> is a template that is used to <emphasis effect="italics">create</emphasis> or
+<emphasis effect="italics">instantiate</emphasis><emphasis effect="italics">instances</emphasis> called <emphasis effect="italics">objects</emphasis>. Since memory is
+allocated separately for each object, these variables are called <emphasis effect="italics">instance
+variables</emphasis>.</footnote>
+However, a <emphasis effect="italics">local variable</emphasis> declared within a method does not, so you are
+required to initialize it before use, either in its declaration or in an
+assignment statement:</para>
+      <code id="id125026" display="block">void m(int n) {   // n is initialized from the actual parameter
+  int i, j;
+  i = 2;             // i is initialized by the assignment
+  int k = 1;         // k is initialized in its declaration
+  if (i == n)        // OK
+    k = j;           // Error, j is not initialized
+  else
+    j = k;
+}
+</code>
+      <para id="id125106">The variable must be initialized on <emphasis effect="italics">every</emphasis> path from declaration
+to use even if the semantics of the program ensure that the path cannot be taken:</para>
+      <code id="id125118" display="block">void m(int n) {
+  int i;
+  if (n == n)           // Always true
+    i = n;
+  else
+    n = i;              // Error, although never executed!!
+}
+</code>
+      <para id="id125177">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">The local variable ... may not have been initialized</emphasis>
+      </para>
+      <para id="id125191">Note: If the expression in the <code display="inline">if</code>-statement can be computed at compile-time:</para>
+      <code id="id125200" display="block">if (true)                  // OK
+if ('n' == 'n')            // OK
+</code>
+      <para id="id125228">the error will not occur.</para>
+    </section>
+    <section id="uid3">
+      <title>
+        <emphasis effect="bold">... in ... cannot be applied to ...</emphasis>
+      </title>
+      <para id="id125246">This error message is very common and results from an incompatibility between
+a method call and the method's declaration:</para>
+      <code id="id125250" display="block">void m(int i) { ... }
+ 
+m(5.5);        // Error, the literal is of type double, not int
+</code>
+      <para id="id125278">Check the declaration and call carefully. You can also get the error message
+<emphasis effect="bold">cannot find symbol</emphasis> if the declaration of the method is in the
+API.<footnote id="uid4">The <emphasis effect="italics">Application Programming Interface (API)</emphasis> describes
+how to use the library of classes supplied as part of the Java system. By
+extension, it is also used as a name for the library itself.</footnote></para>
+      <para id="id125304">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">The method ... in the type ... is not applicable for the arguments ...</emphasis>
+      </para>
+    </section>
+    <section id="uid5">
+      <title>
+        <emphasis effect="bold">operator ... cannot be applied to ...,...</emphasis>
+      </title>
+      <para id="id125331">Operators are only defined for certain types, although implicit type conversion
+is allowed between certain numeric types:</para>
+      <code id="id125336" display="block">int a = 5;
+boolean b = true;
+int c = a + b;       // Error, can't add a boolean value
+double d = a + 1.4;  // OK, int is implicitly converted to double
+</code>
+      <para id="id125376">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">The operator + is undefined for the argument type(s) int, boolean</emphasis>
+      </para>
+    </section>
+    <section id="uid6">
+      <title>
+        <emphasis effect="bold">possible loss of precision</emphasis>
+      </title>
+      <para id="id125402">This error arises when trying to assign
+a value of higher precision to a variable of lower precision without an
+explicit type cast. Surprisingly, perhaps, floating point literals are of
+type <code display="inline">double</code> and you will get this message if you try to assign one to a variable
+of type <code display="inline">float</code>:</para>
+      <code id="id125418" display="block">float sum = 0.0;          // Error, literal is not of type float
+</code>
+      <para id="id125429">The correct way to do this is to use a literal of type <code display="inline">float</code> or
+an explicit type cast:</para>
+      <code id="id125440" display="block">float sum = 0.0f;         // OK
+float sum = (float) 0.0;  // OK
+</code>
+      <para id="id125459">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">Type mismatch: cannot convert from double to float</emphasis>
+      </para>
+    </section>
+    <section id="uid7">
+      <title>
+        <emphasis effect="bold">incompatible types</emphasis>
+      </title>
+      <para id="id125486">Java checks that the type of an expression is compatible with the type of the
+variable in an assignment statement and this error will result if
+they are incompatible:</para>
+      <code id="id125490" display="block">boolean b = true;
+int a = b;              // Error, can't assign boolean to int
+</code>
+      <para id="id125512">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">Type mismatch: cannot convert from boolean to int</emphasis>
+      </para>
+      
+      <para id="id125535"><emphasis effect="bold">Important note</emphasis><newline/>
+In the C language it is (unfortunately!) legal to write <code display="inline">if (a = b)</code>
+using the assignment operator instead of <code display="inline">if (a == b)</code> using the equality operator.
+The meaning is to execute the assignment, convert the value to an integer
+and use its value to make the decision for the <code display="inline">if</code>-statement (zero is false
+and non-zero is true). In Java, the assignment is legal and results in a value,
+but (unless <code display="inline">a</code> is of type <code display="inline">boolean</code>!) this error message will result
+because the expression in an <code display="inline">if</code>-statement must be of type <code display="inline">boolean</code>, not
+<code display="inline">int</code>. Writing <code display="inline">==</code> instead of <code display="inline">=</code> becomes a simple compile-time error in
+Java, whereas in C this error leads to runtime errors that are extremely
+difficult to find.</para>
+      
+      
+      
+      
+    </section>
+    <section id="uid8">
+      <title>
+        <emphasis effect="bold">inconvertible types</emphasis>
+      </title>
+      <para id="id125638">Not every type conversion is legal:</para>
+      <code id="id125641" display="block">boolean b = true;
+int x = (int) b;   // Error, can't convert boolean to int
+</code>
+      <para id="id125663">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">Type mismatch: cannot convert from ... to ...</emphasis>
+      </para>
+    </section>
+  </content>
+</document>

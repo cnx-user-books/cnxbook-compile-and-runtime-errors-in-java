@@ -1,0 +1,203 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Syntax Errors in Java</title>
+  <metadata>
+  <md:content-id>m31181</md:content-id><md:title>Syntax Errors in Java</md:title>
+  <md:abstract>Basic syntax errors in Java are explained.</md:abstract>
+  <md:uuid>4de6b08f-07be-4720-a299-be6f95ebc40b</md:uuid>
+</metadata>
+
+<content>
+    <para id="id291384">Some errors are caused by violations of the syntax of Java. Although
+they are easy to understand, there is no easy way to find the exact cause
+of such errors except by checking the code around the location of the
+error <emphasis effect="italics">character by character</emphasis> looking for the syntax error.</para>
+    <section id="uid1">
+      <title>
+        <emphasis effect="bold">...expected</emphasis>
+      </title>
+      <para id="id291409">The syntax of Java is very specific about the
+required punctuation. This error occurs, for example, if you forget a semicolon
+at the end of a statement or don't balance parentheses:</para>
+      <code id="id291414" display="block">if (i &gt; j        // Error, unbalanced parentheses
+  max = i        // Error, missing semicolon
+else
+  max = j;
+</code>
+      <para id="id291450">Unfortunately, this syntax error is not necessarily caught precisely at the
+point of the mistake so you must carefully check the preceding characters in
+the line or even in a previous line in order to find the problem.</para>
+      <para id="id291458"><emphasis effect="bold">Eclipse:</emphasis><newline/><emphasis effect="bold">Syntax error, insert ") Statement" to complete IfStatement</emphasis><newline/><emphasis effect="bold">Syntax error, insert ";" to complete Statement</emphasis><newline/>
+Eclipse is more informative as to the precise syntax error encountered.
+</para>
+      
+      
+      
+    </section>
+    <section id="uid2">
+      <title>
+        <emphasis effect="bold">unclosed string literal</emphasis>
+      </title>
+      <para id="id291506">String literals must be enclosed in quotation marks.<footnote id="uid3">A <emphasis effect="italics">literal</emphasis>
+is a source-code representation of a value; most literals are of primitive
+types like <code display="inline">int</code> or <code display="inline">char</code>, but there are also literals of type <code display="inline">String</code>
+and the literal <code display="inline">null</code> of any reference type.</footnote> This error occurs if you fail
+to terminate the literal with quotation marks. Fortunately, the syntax of Java
+requires that a string literal appear entirely on one line so the error message
+appears on the same line as the mistake. If you need a string literal that is
+longer than a single line, create two or more literals and concatenate them
+with <code display="inline">+</code>:</para>
+      <code id="id291554" display="block">String longString =
+  "This is first half of a long string " +
+  "and this is the second half.";
+</code>
+      <para id="id291582"><emphasis effect="bold">Eclipse: String literal is not properly closed by a double-quote</emphasis>
+In Eclipse you can write a string literal of arbitrary length and the environment
+will break the string and insert the <code display="inline">+</code> automatically.</para>
+    </section>
+    <section id="uid4">
+      <title>
+        <emphasis effect="bold">illegal start of expression</emphasis>
+      </title>
+      <para id="id291615">Most programming constructs are either statements or expressions.
+This error occurs when an expression is expected but not found.
+<emphasis effect="italics">In Java, an assignment statement is considered to be an expression
+which returns a value</emphasis>, so errors concerning expressions also apply to
+assignment statements.<footnote id="uid5">The value of an assignment statement considered
+as an expression
+is the value of the expression on the right-hand side that is assigned to the
+variable on the left-hand side.</footnote>
+Examples:</para>
+      <list id="id291637" display="block" list-type="bulleted"><item id="uid6">An extra right parenthesis after the condition of an <code display="inline">if</code>-statement:
+<code id="id291658" display="block">if (i &gt; j) )        // Error, extra parenthesis
+  max = i;
+</code><emphasis effect="bold">Eclipse: Syntax error on token ")", delete this token</emphasis><footnote id="uid7">The syntax of a
+programming language is defined in terms of <emphasis effect="italics">tokens</emphasis> consisting of one or
+more characters. Identifiers and reserved keywords are tokens as are single
+characters like <code display="inline">+</code> and sequences of characters like <code display="inline">!=</code>.</footnote>
+Eclipse diagnoses this as a simple syntax error and does not mention expressions.
+</item>
+        <item id="uid8">Forgetting the right-hand side of an assignment statement:
+<code id="id291731" display="block">max = ;            // Error, missing right-hand side
+</code><emphasis effect="bold">Eclipse: Syntax error on token "=", Expression expected after this token</emphasis></item>
+      </list>
+    </section>
+    <section id="uid9">
+      <title>
+        <emphasis effect="bold">not a statement</emphasis>
+      </title>
+      <para id="id291771">This error occurs when a syntactically correct statement does not appear where
+it should. Examples:</para>
+      <list id="id291776" display="block" list-type="bulleted"><item id="uid10">Writing an assignment statement without the assignment operator:
+<code id="id291791" display="block">max ;          // Error, missing =
+</code><emphasis effect="bold">Eclipse: Syntax error, insert "AssignmentOperator Expression"</emphasis><emphasis effect="bold">   to complete Expression</emphasis></item>
+        <item id="uid11">Misspelling <code display="inline">else</code>:
+<code id="id291840" display="block">if (i &gt; j)
+  max = i;
+els ;          // Error, else not spelled correctly
+</code>The reason you do not get “else expected” is that you need not write an
+<code display="inline">else</code> alternative so this just looks like a bad statement.<newline/>
+<emphasis effect="bold"><newline/>
+Eclipse:<newline/>els cannot be resolved</emphasis><newline/>
+<emphasis effect="bold">Syntax error, insert "AssignmentOperator Expression" to complete Expression</emphasis><newline/>
+The same identifier can be used in
+different methods and classes. An important task of the compiler is to
+<emphasis effect="italics">resolve</emphasis>
+the ambiguity of multiple uses of the same identifer; for
+example, if a variable is declared both directly within a class and also within
+a method, the use of its unqualified name is resolved in favor of the local
+variable. This error message simply means that the compiler could not obtain an
+(unambiguous) meaning for the identifier <emphasis effect="bold">els</emphasis>.</item>
+        <item id="uid13">The following code:
+<code id="id291966" display="block">if (i &gt; j)
+  max = i;
+els           // Error, else not spelled correctly
+  max = j;
+</code>results in a weird error message:
+<code id="id292009" display="block">x.java:6: cannot find symbol
+symbol  : class els
+location: class x
+els
+</code>The reason is that the compiler interprets this as a declaration:
+<code id="id292050" display="block">els max = j;
+</code>and can't find a class <code display="inline">els</code> as the type of the variable <code display="inline">max</code>.<newline/>
+<emphasis effect="bold">Eclipse: Duplicate local variable max</emphasis><emphasis effect="bold">els cannot be resolved to a type</emphasis>
+These messages are more helpful: first, the use of the word <emphasis effect="italics">type</emphasis> instead
+of <emphasis effect="italics">class</emphasis> is more exact because the type of a variable need
+not be a class (it could be a primitive type or interface);
+second, the message about the duplicate variable gives an extra clue as to
+the source of the error.
+</item>
+        <item id="uid14">The error can also be caused by attempting to declare a variable whose
+name is that of a reserved keyword:
+<code id="id292134" display="block">void f() {
+  int default = 10;
+}
+</code><emphasis effect="bold">Eclipse:</emphasis><emphasis effect="bold">Syntax error on token "default", invalid VariableDeclaratorId</emphasis></item>
+      </list>
+    </section>
+    <section id="uid15">
+      <title>
+        <emphasis effect="bold">cannot find symbol</emphasis>
+      </title>
+      <para id="id292188">This is probably the most common compile-time error. All identifiers in Java
+must be declared before being used and an inconsistency between the declaration
+of an identifier and its use will give rise to this error. <emphasis effect="bold">Carefully
+check the spelling of the identifier.</emphasis> It is easy to make a mistake by using a
+lower-case letter instead of an upper case one, or to confuse the letter O with
+the numeral 0 and the letter l with the numeral 1.</para>
+      <para id="id292200">Other sources of this error are: calling a constructor
+with an incorrect parameter signature, and
+using an identifier outside its scope, for example,
+using an identifier declared in a <code display="inline">for</code>-loop outside the loop:</para>
+      <code id="id292211" display="block">int[] a = {1, 2, 3};
+int sum = 0;
+for (int i = 0; i &lt; a.length; i++)
+  sum = sum + a[i];
+System.out.println("Last = " + i);        // Error, i not in scope
+</code>
+      <para id="id292258">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">... cannot be resolved</emphasis>
+      </para>
+    </section>
+    <section id="uid16">
+      <title>
+        <emphasis effect="bold">... is already defined in ...</emphasis>
+      </title>
+      <para id="id292284">An identifier can only be declared once in the same scope:</para>
+      <code id="id292287" display="block">int sum = 0;
+double sum = 0.0;   // Error, sum already defined
+</code>
+      <para id="id292306">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">Duplicate local variable sum</emphasis>
+      </para>
+    </section>
+    <section id="uid17">
+      <title>
+        <emphasis effect="bold">array required but ... found</emphasis>
+      </title>
+      <para id="id292332">This error is caused by attempting
+to index a variable which is not an array.</para>
+      <code id="id292336" display="block">int max(int i, int j) {
+  if (i &gt; j) return i;
+  else return j[i];              // Error, j is not an array
+}
+</code>
+      <para id="id292374">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">The type of the expression must be an array type but it resolved to int</emphasis>
+      </para>
+    </section>
+    <section id="uid18">
+      <title>
+        <emphasis effect="bold">... has private access in ...</emphasis>
+      </title>
+      <para id="id292400">It is illegal to access a variable declared private outside its class.</para>
+      <para id="id292404">
+        <emphasis effect="bold">Eclipse:</emphasis>
+        <emphasis effect="bold">The field ... is not visible</emphasis>
+      </para>
+    </section>
+  </content>
+</document>

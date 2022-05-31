@@ -1,0 +1,202 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Exceptions in Java</title>
+  <metadata>
+  <md:content-id>m31184</md:content-id><md:title>Exceptions in Java</md:title>
+  <md:abstract>This module explains the various exceptions that are raised by the Java Runtime Environment.</md:abstract>
+  <md:uuid>09615953-c77d-44dd-bae7-c6bef15ac82a</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Out of range</title>
+      <para id="id171383">These exceptions are the most common and are caused by attempting to access an
+array or string with an index that is outside the limits of the array or
+string. C programmers will be familiar with the difficult bugs that are caused
+by such errors which “smear” memory belonging to other variables; in Java
+the errors cause an exception immediately when they occur thus facilitating
+debugging.</para>
+      <section id="uid1">
+        <title>
+          <emphasis effect="bold">ArrayIndexOutOfRange</emphasis>
+        </title>
+        <para id="id171404">This exception is thrown when attempting the index an array <code display="inline">a[i]</code> where the index <code display="inline">i</code>
+is not within the values <code display="inline">0</code> and <code display="inline">a.length-1</code>, inclusive. Zero-based arrays
+can be confusing; since the <code display="inline">length</code> of the array is larger than the last
+index, it is not unusual to write the following in a <code display="inline">for</code>-statement by mistake:</para>
+        <code id="id171440" display="block">final static int SIZE = 10;
+int a = new int[SIZE];
+ 
+for (int i = 0; i &lt;= SIZE; i++)     // Error, &lt;= should be &lt;
+ 
+for (int i = 0; i &lt;= a.length; i++) // Better, but still an error
+</code>
+      </section>
+      <section id="uid2">
+        <title>
+          <emphasis effect="bold">StringIndexOutOfRange</emphasis>
+        </title>
+        <para id="id171514">This exception is thrown by many methods of the class <code display="inline">String</code>
+if an index is not within the values <code display="inline">0</code> and <code display="inline">s.length()</code>, inclusive. Note that
+<code display="inline">s.length()</code> is valid and means the position just after the last character
+in the string.</para>
+      </section>
+    </section>
+    <section id="cid2">
+      <title>
+        <emphasis effect="bold">NullPointerException</emphasis>
+      </title>
+      <para id="id171552">A variable in Java is either of a <emphasis effect="italics">primitive type</emphasis> such as <code display="inline">int</code> or
+<code display="inline">boolean</code> or of a <emphasis effect="italics">reference type</emphasis>: an array type, the type of a class
+defined in the Java API such as <code display="inline">String</code>, or the type of a class that you
+define such as <code display="inline">MyClass</code>. When declaring a variable of a reference type, you
+only get a variable that can hold a reference to an object of that
+class. At this point, attempting to access a field or method of the class will
+cause the exception <code display="inline">NullPointerException</code> to be thrown:<footnote id="uid3">The name of
+the exception is an anachronism, because there are no (explicit)
+<emphasis effect="italics">pointers</emphasis> in Java.</footnote></para>
+      <code id="id171609" display="block">class YourClass {
+  static MyClass my;    // Can hold a reference but doesn't yet
+ 
+  public static void main(String[] args) {
+    my.m(5);            // Throws NullPointerException
+  }
+}
+</code>
+      <para id="id171672">Only after instantiating the class and executing the constructor do you get
+an object:</para>
+      <code id="id171678" display="block">class YourClass {
+  static MyClass my;    // Can hold a reference but doesn't yet
+ 
+  public static void main(String[] args) {
+    my = new MyClass(); // Instantiates an object
+                        //   and assigns the reference
+    my.m(5);            // Throws NullPointerException
+  }
+}
+</code>
+      <para id="id171760">This exception is not often seen in this context because Java style prefers
+that the declaration of the variable include the instantiation as its
+initial value:</para>
+      <code id="id171766" display="block">class YourClass {
+  // Declaration + instantiation of class variable
+  static MyClass my1 = new MyClass();
+ 
+  public static void main(String[] args) {
+    my1.m(5);            // OK
+    // Declaration + instantiation of local variable
+    MyClass my2 = new MyClass();
+    my2.m(5);            // OK
+  }
+}
+</code>
+      <para id="id171862">Sometimes, you cannot initialize a variable at its declaration;
+an obvious place to initialize an instance variable is within its constructor:</para>
+      <code id="id171869" display="block">class YourClass {
+  MyClass[] my;          // Can't initialize here because ...
+ 
+  YourClass(int size) {  // ... size of array different for each
+    object my = new MyClass[size];
+  }
+}
+</code>
+      <para id="id171932">The exception is likely to occur when you declare an array whose
+elements are of reference type. It is easy to forget that the array contains
+only references and that each element must be separately initialized:</para>
+      <code id="id171939" display="block">MyClass[] my = new MyClass[4];       // Array of references
+my[1].m(5);                          // Raises an exception
+ 
+for (int i = 0; i &lt; my.length; i++)
+  my[i] = new MyClass();             // Instantiate objects
+my[1].m(5);                          // OK
+</code>
+      <para id="id171998">Finally, <code display="inline">NullPointerException</code> will occur if you get a reference as a return
+value from a method and don't know or don't check that the value is
+non-null:<footnote id="uid4">You could <emphasis effect="italics">know</emphasis> this if the method has been verified
+for a <emphasis effect="italics">postcondition</emphasis> that specifies a non-null return value.</footnote></para>
+      <code id="id172027" display="block">Node node = getNextNode();
+if (node.key &gt; this.key) ...         // Error if node is null!
+ 
+if (node != null) {                  // This should be done first
+  if (node.key &gt; this.key) ...
+}
+</code>
+    </section>
+    <section id="cid3">
+      <title>Computational errors</title>
+      <para id="id172095">The following three exceptions occur when you try to convert a string to a number and the
+form of the string does not match that of a number, for example <code display="inline">"12a3"</code>.</para>
+      <section id="uid5">
+        <title>
+          <emphasis effect="bold">InputMismatchException</emphasis>
+        </title>
+        <para id="id172116">This exception is thrown by the class <code display="inline">Scanner</code>, which is a class
+introduced into version 5 of Java to simplify character-based input to programs.</para>
+      </section>
+      <section id="uid6">
+        <title>
+          <emphasis effect="bold">IllegalFormatException</emphasis>
+        </title>
+        <para id="id172138">This exception is thrown by the method <code display="inline">format</code> in class <code display="inline">String</code> that
+enables output using format specifiers as in the C language.</para>
+      </section>
+      <section id="uid7">
+        <title>
+          <emphasis effect="bold">NumberFormatException</emphasis>
+        </title>
+        <para id="id172164">This exception is thrown by methods declared in the numeric “wrapper” classes
+such as <code display="inline">Integer</code> and <code display="inline">Double</code>, in particular by the methods <code display="inline">parseInt</code>
+and <code display="inline">parseDouble</code> that convert from strings to the primitive numeric types.</para>
+      </section>
+      <section id="uid8">
+        <title>
+          <emphasis effect="bold">ArithmeticException</emphasis>
+        </title>
+        <para id="id172203">This exception is thrown if you attempt to divide by zero.</para>
+        <para id="id172207"><emphasis effect="bold">Important note</emphasis><newline/>
+Most computational errors <emphasis effect="italics">do not</emphasis> result
+in the raising of an exception! Instead, the result is an artificial
+value called <code display="inline">NaN</code>, short for <emphasis effect="italics">Not a Number</emphasis>. This value can even
+be printed:</para>
+        
+        <code id="id172239" display="block">double x = Math.sqrt(-1);  // Does not throw an exception!
+System.out.println(x);
+</code>
+        <para id="id172264">Any attempt to perform further computation with <code display="inline">NaN</code> does not change the
+value. That is, if <code display="inline">x</code> is <code display="inline">NaN</code> then so is <code display="inline">y</code> after executing <code display="inline">y =
+x+5</code>. It follows that an output value of <code display="inline">NaN</code> gives no information as to the
+statement that first produced it. You will have to set breakpoints or use print
+statements to search for it.
+        </para>
+      </section>
+    </section>
+    <section id="cid4">
+      <title>Insufficient memory</title>
+      <para id="id172314">Modern computers have very large memories so you are unlikely to encounter these
+exceptions in routine programming. Nevertheless, they can occur as a side effect
+of other mistakes.</para>
+      <section id="uid9">
+        <title>
+          <emphasis effect="bold">outOfMemoryError</emphasis>
+        </title>
+        <para id="id172330">This exception can be thrown if you run out of memory:</para>
+        <code id="id172334" display="block">int a = new int[100000000];
+</code>
+      </section>
+      <section id="uid10">
+        <title>
+          <emphasis effect="bold">StackOverFlowArea</emphasis>
+        </title>
+        <para id="id172356">A stack is used to store the activation record of each method that is called;
+it contains the parameters and the local variables as well as other information
+such as the return address. Unbounded recursion can cause the Java Virtual
+Machine to run out of space in the stack:</para>
+        <code id="id172362" display="block">int factorial(int n) {
+  if (n == 0) return 1;
+  else return n * factorial(n + 1);  // Error, you meant n - 1
+}
+</code>
+        <!--empty paragraphs get left behind.-->
+      </section>
+    </section>
+  </content>
+</document>

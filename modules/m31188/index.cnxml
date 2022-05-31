@@ -1,0 +1,134 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Debugging Java Programs Without a Debugger</title>
+  <metadata>
+  <md:content-id>m31188</md:content-id><md:title>Debugging Java Programs Without a Debugger</md:title>
+  <md:abstract>This module contains tips for debugging a Java program without a debugger, primarily by printing out data during the execution of the program.</md:abstract>
+  <md:uuid>0d2192b2-9c64-4bc7-808f-cc3d84adbea1</md:uuid>
+</metadata>
+
+<content>
+    <para id="id251755">Debugging is perhaps best done using a debugger such as those provided
+by integrated development environments. Nevertheless, many programmers debug
+programs by inserting print statements. This section describes some of the
+techniques that can be used in Java.</para>
+    <section id="cid1">
+      <title>Printing number data and arrays</title>
+      <para id="id251773">The methods <code display="inline">System.out.print</code> and <code display="inline">System.out.println</code> are predefined
+for primitive types as well as for strings:</para>
+      <code id="id251786" display="block">int i = 1;
+double d = 5.2;
+System.out.print(i);
+System.out.println(d);
+</code>
+      <para id="id251820">Furthermore, automatic
+conversion to <code display="inline">String</code> type is performed by the concatenation operator <code display="inline">+</code>:</para>
+      <code id="id251836" display="block">System.out.println("d = " + d + "and i = " + i);
+</code>
+      <para id="id251846">The print statements can not print an entire array, so a method must be written:</para>
+      <code id="id251852" display="block">public static void print(int[] a) {
+  for (int i = 0; i &lt; a.length; i++)
+    System.out.print(a[i]);
+  System.out.println();
+}
+ 
+public static void main(String[] args) {
+  int[] a = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+  print(a);
+}
+</code>
+      <para id="id251941">Since the number of elements of an array can be large, it is better to
+write the method so that it inserts a newline after printing a fixed number of elements:</para>
+      <code id="id251946" display="block">public static void print(int[] a) {
+  for (int i = 0; i &lt; a.length; i++) {
+    System.out.print(a[i]);
+    if (i % 8 == 7)  System.out.println();
+  }
+  System.out.println();
+}
+</code>
+      <para id="id252009">You can put this static method in a publicly accessible class and use it to
+print any integer array. Similar methods can be written for the other primitive types.</para>
+    </section>
+    <section id="cid2">
+      <title>Converting objects to strings</title>
+      <para id="id252025">Within the class <code display="inline">Object</code>, the root class for all other classes, a method
+<code display="inline">toString</code> is declared. The default implementation will not give useful
+information, so it is a good idea to override it in each class that you write:</para>
+      <code id="id252040" display="block">class Node {
+  int key;
+  double value;
+  public String toString() {
+    return "The value at key " + key + " is " + value;
+  }
+}
+</code>
+      <para id="id252100">Then, you can simply call the print statements for any object of this class
+and the conversion to <code display="inline">String</code> is done automatically:</para>
+      <code id="id252111" display="block">Node node = new Node();
+...
+System.out.println(node);
+</code>
+      <para id="id252138">The predefined class <code display="inline">java.util.Arrays</code> constains a lot of useful (static)
+methods for working with arrays, among them <code display="inline">toString</code> methods for arrays
+whose elements are of any primitive type:</para>
+      <code id="id252153" display="block">int[] a = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+System.out.println(java.util.Arrays.toString(a));
+</code>
+      <para id="id252172">or</para>
+      <code id="id252177" display="block">import java.util.Arrays;
+   ...
+System.out.println(Arrays.toString(a));
+</code>
+      <para id="id252204">You will receive a predefined representation of the array (the elements
+are separated by commas), so if you want an alternate representation (such as
+printing on multiple lines) you will have to write your own print method as we
+did in the previous section.</para>
+      <para id="id252211">An array of objects of <emphasis effect="italics">any reference type</emphasis> can be printed by defing a
+single method since any object can be converted to <code display="inline">Object</code>:</para>
+      <code id="id252226" display="block">public static void print(Object[] a) {
+  for (int i = 0; i &lt; a.length; i++)
+    System.out.print(a[i]);
+  System.out.println();
+}
+ 
+Node[] nodes = new Node[];
+   ...                         // Create elements of the array
+print(nodes);
+</code>
+      <para id="id252306">or by calling the predefined method <code display="inline">deepToString</code>:</para>
+      <code id="id252317" display="block">Node[] nodes = new Node[];
+   ...                         // Create elements of the array
+System.out.println(java.util.Arrays.deepToString(node));
+</code>
+    </section>
+    <section id="cid3">
+      <title>Forcing a stack trace</title>
+      <para id="id252354">Suppose that you have isolated a bug to a certain method but you do not know
+which call of that method was responsible. You can force the interpreter to
+print a trace of the call stack by inserting the line:</para>
+      <code id="id252359" display="block">new Exception().printStackTrace();
+</code>
+      <para id="id252369">within the method. It creates a new object of type <code display="inline">Exception</code> and then
+invokes the method <code display="inline">printStackTrace</code>. Since the exception is not thrown, the
+execution of the program proceeds with no interruption. A program can always be
+terminated by calling <code display="inline">System.exit(n)</code> for an integer <code display="inline">n</code>.</para>
+    </section>
+    <section id="cid4">
+      <title>Leave the debug statements in the program</title>
+      <para id="id252407">Once you have found a bug, it is tempting to delete the print statements used
+for debugging, but it is better not to do so because you may need them in the
+future. You can comment out the statements that you don't need, but a better
+solution is to declare a global constant and then use it to turn the print
+statements on and off:</para>
+      <code id="id252413" display="block">public class Global {
+  public static boolean DEBUG = false;
+  public static void print(int[] a) {...}
+  public static void print(Object[] a) {...}
+}
+ 
+  if (Global.DEBUG) Global.print(nodes);
+</code>
+      <!--empty paragraphs get left behind.-->
+    </section>
+  </content>
+</document>

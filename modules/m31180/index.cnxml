@@ -1,0 +1,120 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Introducing Compile and Runtime Errors in Java</title>
+  <metadata>
+  <md:content-id>m31180</md:content-id><md:title>Introducing Compile and Runtime Errors in Java</md:title>
+  <md:abstract>This module introduces a collection of modules on identifying and correcting errors in programs written in the Java programming languages. It covers both compile-time errors and runtime errors (exceptions). The compile-time errors are discussed both for Sun's compiler and the Eclipse compiler.</md:abstract>
+  <md:uuid>34e02fba-ffce-4928-a11b-46eee74ceb06</md:uuid>
+</metadata>
+<featured-links>
+  <!-- WARNING! The 'featured-links' section is read only. Do not edit below.
+       Changes to the links section in the source will not be saved. -->
+    <link-group type="supplemental">
+      <link url="http://stwww.weizmann.ac.il/g%2Dcs/benari/oop/errors.pdf" strength="3">Compile and Runtime Errors in Java (PDF)</link>
+      <link url="http://stwww.weizmann.ac.il/g%2Dcs/benari/oop/errors.tex" strength="3">Compile and Runtime Errors in Java (LaTeX)</link>
+    </link-group>
+  <!-- WARNING! The 'featured-links' section is read only. Do not edit above.
+       Changes to the links section in the source will not be saved. -->
+</featured-links>
+<content>
+    <para id="id163661"><emphasis effect="bold">Acknowledgement:</emphasis>
+Otto Seppälä and Niko Myller contributed many helpful suggestions.</para>
+    <section id="cid1">
+      <title>Compilation errors</title>
+      <para id="id163680">Compilers are notorious for their obscure error messages like “not a
+statement” that leave you wondering what they mean. Java is the most
+widely used language for teaching and learning introductory programming,
+and most students and teachers use the Sun SDK (System Development Kit)
+either directly or indirectly through a development environment like
+BlueJ or DrJava. The error messages produced by this compiler are terse
+and many novices find it difficult to achieve even syntactically correct
+programs. This document is a guide to understanding and fixing errors in
+Java.</para>
+      <para id="eip-410">There are three modules relating to errors discovered at compilation time: <link document="m31181">Syntax Errors in Java</link>, <link document="m31182">Semantic Errors in Java</link> and <link document="m31183">Structural Errors in Java</link>. There are two modules on exceptions (errors discovered when the program is run): <link document="m31184">Exceptions in Java</link> and <link document="m31186">Executing a Java Program</link>. Since many errors arise from misunderstandings of <link document="m31187">Assignment and Equality in Java</link>, there is a module that explains how they work with reference semantics. Finally, module <link document="m31188">Debugging Java Programs Without a Debugger</link> will help you debug Java programs.
+</para><para id="id163699">The Eclipse development environment has its own compiler for Java. While
+the environment is not as elementary as those intended for novices, it
+has much to recommend it—even in introductory courses—because of its
+superior error messages and its support for identifying and correcting
+syntax errors. The compiler is <emphasis effect="italics">incremental</emphasis> meaning that it checks
+the correctness of your program as you type. Eclipse error message are
+different from those of the Sun SDK and will be presented alongside
+them.</para>
+      <para id="id163714">If you doubt that an error message is correct, you can consult the
+formal definition of the Java language which is contained in the book
+<emphasis effect="italics">The Java Language Specification</emphasis> by James Gosling, Bill Joy, Guy
+L. Steele Jr. and Gilad Bracha. It can also be downloaded from
+<link url="http://java.sun.com/docs/books/jls/index.html" window="new">http://java.sun.com/docs/books/jls/index.html</link>.
+</para>
+      <para id="id163730">Before we discuss the various errors, it is important to understand that
+compilers are not very good at recovering from errors. Frequently, a single
+small mistake will cause the compiler to issue a cascade of messages. For
+example, in the following code, we forgot to write the closing brace of the
+method <code display="inline">f</code>:</para>
+      <code id="id163741" display="block">class MyClass {
+  void f() {
+    int n = 10;
+                           // Error, closing brace is missing
+  void g() {
+    int m = 20;
+  }
+}
+</code>
+      <para id="id163809">An attempt to compile the program results in <emphasis effect="italics">three</emphasis> error messages:</para>
+      <code id="id163820" display="block">MyClass.java:5: illegal start of expression
+  void g() {
+  ^
+MyClass.java:8: ';' expected
+}
+^
+MyClass.java:9: '}' expected
+^
+</code>
+      <para id="id163897">Do not invest any effort in trying to fix multiple error messages! Concentrate
+on fixing the first error and then recompile.</para>
+      <para id="id163903"><emphasis effect="bold">Eclipse: Syntax error, insert "}" to complete MethodBody</emphasis>. Eclipse is much better at diagnosing this error and produces only one message.</para>
+    </section>
+    <section id="cid2">
+      <title>Runtime errors</title>
+      <para id="id163926">When the Java interpreter encounters an error during runtime it <emphasis effect="italics">throws
+an exception</emphasis> and prints a <emphasis effect="italics">stack trace</emphasis> showing the entire call
+stack—the list of methods called from the main program until the statement
+that caused the exception.<footnote id="uid1">Many programming languages prefer the term
+<emphasis effect="italics">raises</emphasis> an exception and even <emphasis effect="italics">The Java Language Specification</emphasis>
+uses this term on occasion.</footnote> Consider the following program:</para>
+      <code id="id163962" display="block">class Test {
+  public static void main(String[] args) {
+    String s = "Hello world";
+    System.out.println(s.substring(10,12));
+  }
+}
+</code>
+      <para id="id164014">We are trying to extract a substring of the string <code display="inline">s</code> but the
+upper index <code display="inline">12</code> is not within the string. Attempting to execute
+this code will cause an exception to be thrown:</para>
+      <code id="id164031" display="block">Exception in thread "main"
+  java.lang.StringIndexOutOfBoundsException:
+  String index out of range: 12
+        at java.lang.String.substring(Unknown Source)
+        at Test.main(Test.java:4)
+</code>
+      <para id="id164076">The exception was thrown from <emphasis effect="italics">within</emphasis> the library class <code display="inline">String</code> during
+the execution of the method <code display="inline">substring</code>. This method was called at line <code display="inline">4</code> of
+method <code display="inline">main</code> in the class <code display="inline">Test</code>. It is unlikely that there is an error
+that causes an exception in
+a well established class of the Java library like <code display="inline">String</code>; more likely, the
+<code display="inline">String</code> class itself identified the error and threw the exception
+explicitly, so we are advised to seek the error starting at the <emphasis effect="italics">deepest</emphasis>
+method of our own program.</para>
+      <para id="id164130">The calls in the stack trace are listed in reverse order of invocation, that
+is, the first call listed is the deepest method (where the exception occurred),
+while the last call listed is the shallowest method, namely <code display="inline">main</code>.</para>
+      <para id="id164141">Exceptions can be <emphasis effect="italics">caught</emphasis> by writing a block of code called an
+<emphasis effect="italics">exception handler</emphasis> that will be executed when an exception is
+thrown.<footnote id="uid2">An alternate terminology is to say that an exception is
+<emphasis effect="italics">handled</emphasis> by an exception handler.</footnote> Exception handlers are discussed in
+textbooks on the Java language; here we limit ourselves to explaining the
+exceptions that indicate programming errors. We further limit ourselves to
+exceptions commonly thrown by the language core; classes in the API define
+their own exceptions and these are explained in the API documentation.</para>
+    </section>
+  </content>
+</document>
